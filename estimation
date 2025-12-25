@@ -1,688 +1,800 @@
 import React, { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { Home, Building2, Mail, Phone, User, MapPin, Check, Loader2, AlertCircle } from 'lucide-react';
 
-export default function EstimationImmobiliere() {
+const PrestigeRealEstate = () => {
+  const [language, setLanguage] = useState('fr');
   const [step, setStep] = useState('captcha');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [formData, setFormData] = useState({
-    nom: '',
-    prenom: '',
+    project: '',
+    sector: '',
+    propertyType: '',
+    budget: '',
+    rooms: '',
+    surface: '',
+    address: '',
+    bedrooms: '',
+    floor: '',
+    totalFloors: '',
+    hasBalcony: '',
+    balconySize: '',
+    hasTerrace: '',
+    terraceSize: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    telephone: '',
-    adresse: '',
-    codePostal: '',
-    ville: '',
-    typeBien: '',
-    superficie: '',
-    chambres: '',
-    sallesBain: '',
-    anneeConstruction: '',
-    projet: '',
-    dateVente: '',
-    prixMin: '',
-    prixMax: '',
-    prixMoyen: ''
+    phone: '',
+    comments: ''
   });
-  const [errors, setErrors] = useState({});
 
-  const handleHumanVerification = () => {
-    setStep('step1');
+  // Configuration EmailJS
+  const EMAILJS_CONFIG = {
+    serviceId: 'service_xxxxxxx',  // À remplacer
+    templateId: 'template_xxxxxxx', // À remplacer
+    publicKey: 'YOUR_PUBLIC_KEY'    // À remplacer
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+  const translations = {
+    fr: {
+      title: "Immobilier de prestige",
+      subtitle: "Paris · Côte d'Azur · Deauville",
+      intro: "Confiez-nous votre projet immobilier de prestige. Remplissez ce formulaire et un conseiller expert vous contactera sous 24h pour un accompagnement personnalisé et sur-mesure.",
+      captchaText: "Veuillez confirmer que vous êtes humain",
+      captchaBtn: "Je ne suis pas un robot",
+      continue: "Continuer",
+      back: "Retour",
+      projectQuestion: "Quel est votre projet ?",
+      estimation: "Obtenir une estimation",
+      sell: "Vendre",
+      buy: "Acheter",
+      other: "Autre",
+      sector: "Secteur souhaité",
+      propertyType: "Type de bien",
+      apartment: "Appartement",
+      house: "Maison",
+      building: "Immeuble",
+      commercial: "Commerce",
+      parking: "Parking",
+      otherType: "Autre",
+      budget: "Budget",
+      rooms: "Nombre de pièces",
+      surface: "Surface souhaitée (m²)",
+      address: "Adresse complète du bien",
+      bedrooms: "Nombre de chambres (facultatif)",
+      floor: "Étage du bien",
+      totalFloors: "Nombre d'étages de l'immeuble",
+      hasBalcony: "Balcon ?",
+      hasTerrace: "Terrasse ?",
+      balconySize: "Surface du balcon (m²)",
+      terraceSize: "Surface de la terrasse (m²)",
+      yes: "Oui",
+      no: "Non",
+      contactTitle: "Vos coordonnées",
+      firstName: "Prénom",
+      lastName: "Nom",
+      email: "Email",
+      phone: "Téléphone",
+      comments: "Commentaires (facultatif)",
+      commentsPlaceholder: "Souhaitez-vous nous préciser quelque chose concernant votre projet ?",
+      submit: "Envoyer ma demande",
+      submitting: "Envoi en cours...",
+      submitError: "Une erreur est survenue. Veuillez réessayer.",
+      thankYouTitle: "Merci pour votre confiance",
+      thankYouMsg: "Votre demande a bien été enregistrée.",
+      nextSteps: "Les prochaines étapes :",
+      step1: "Un conseiller immobilier vous contactera sous 24h",
+      step2: "Analyse approfondie de votre projet",
+      step3: "Accompagnement personnalisé et sur-mesure",
+      rgpd: "Vos données sont traitées de manière confidentielle et ne seront utilisées que dans le cadre de votre projet immobilier.",
+      visitSite: "Visiter notre site",
+      setupRequired: "⚠️ Configuration EmailJS requise - Voir instructions ci-dessous"
+    },
+    en: {
+      title: "Prestige Real Estate",
+      subtitle: "Paris · French Riviera · Deauville",
+      intro: "Entrust us with your prestige real estate project. Fill out this form and an expert advisor will contact you within 24 hours for personalized support.",
+      captchaText: "Please confirm you are human",
+      captchaBtn: "I'm not a robot",
+      continue: "Continue",
+      back: "Back",
+      projectQuestion: "What is your project?",
+      estimation: "Get an estimation",
+      sell: "Sell",
+      buy: "Buy",
+      other: "Other",
+      sector: "Desired area",
+      propertyType: "Property type",
+      apartment: "Apartment",
+      house: "House",
+      building: "Building",
+      commercial: "Commercial",
+      parking: "Parking",
+      otherType: "Other",
+      budget: "Budget",
+      rooms: "Number of rooms",
+      surface: "Desired surface (m²)",
+      address: "Complete property address",
+      bedrooms: "Number of bedrooms (optional)",
+      floor: "Floor",
+      totalFloors: "Total floors in building",
+      hasBalcony: "Balcony?",
+      hasTerrace: "Terrace?",
+      balconySize: "Balcony size (m²)",
+      terraceSize: "Terrace size (m²)",
+      yes: "Yes",
+      no: "No",
+      contactTitle: "Your contact details",
+      firstName: "First name",
+      lastName: "Last name",
+      email: "Email",
+      phone: "Phone",
+      comments: "Comments (optional)",
+      commentsPlaceholder: "Would you like to tell us anything about your project?",
+      submit: "Submit my request",
+      submitting: "Submitting...",
+      submitError: "An error occurred. Please try again.",
+      thankYouTitle: "Thank you for your trust",
+      thankYouMsg: "Your request has been successfully registered.",
+      nextSteps: "Next steps:",
+      step1: "A real estate advisor will contact you within 24 hours",
+      step2: "In-depth analysis of your project",
+      step3: "Personalized support",
+      rgpd: "Your data is processed confidentially and will only be used for your real estate project.",
+      visitSite: "Visit our website",
+      setupRequired: "⚠️ EmailJS configuration required - See instructions below"
     }
   };
 
-  const validateStep = (stepName) => {
-    const newErrors = {};
-    
-    if (stepName === 'step1') {
-      if (!formData.adresse.trim()) newErrors.adresse = 'Adresse requise';
-      if (!formData.codePostal.trim()) newErrors.codePostal = 'Code postal requis';
-      if (!formData.ville.trim()) newErrors.ville = 'Ville requise';
-      if (!formData.typeBien) newErrors.typeBien = 'Type de bien requis';
-      if (!formData.superficie) newErrors.superficie = 'Superficie requise';
-      if (formData.typeBien && formData.typeBien !== 'parking' && formData.typeBien !== 'immeuble') {
-        if (!formData.sallesBain) newErrors.sallesBain = 'Salles de bain requises';
-        if (!formData.anneeConstruction) newErrors.anneeConstruction = 'Année de construction requise';
-      }
-    } else if (stepName === 'step2') {
-      if (!formData.projet) newErrors.projet = 'Projet requis';
-      if (formData.projet === 'vente' && !formData.dateVente) newErrors.dateVente = 'Date de vente requise';
-    } else if (stepName === 'step3') {
-      if (!formData.nom.trim()) newErrors.nom = 'Nom requis';
-      if (!formData.prenom.trim()) newErrors.prenom = 'Prénom requis';
-      if (!formData.email.trim()) newErrors.email = 'Email requis';
-      if (!formData.telephone.trim()) newErrors.telephone = 'Téléphone requis';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const t = translations[language];
+
+  const handleCaptcha = () => {
+    setStep('intro');
   };
 
-  const calculerEstimation = () => {
-    const basePrix = parseInt(formData.superficie) * 3000;
-    const ajustementChambres = (parseInt(formData.chambres) || 0) * 50000;
-    const ajustementBain = (parseInt(formData.sallesBain) || 0) * 30000;
-    const ajustementAge = (2025 - parseInt(formData.anneeConstruction)) * 2000;
-    
-    const prixEstime = basePrix + ajustementChambres + ajustementBain - ajustementAge;
-    const marge = prixEstime * 0.15;
-    
-    return {
-      min: Math.round((prixEstime - marge) / 1000) * 1000,
-      max: Math.round((prixEstime + marge) / 1000) * 1000,
-      moyen: Math.round(prixEstime / 1000) * 1000
-    };
-  };
-
-  const handleNextStep = () => {
-    if (step === 'step1') {
-      if (validateStep('step1')) {
-        if (formData.typeBien === 'parking' || formData.typeBien === 'immeuble') {
-          setStep('step3');
-        } else {
-          setStep('step2');
-        }
-      }
-    } else if (step === 'step2') {
-      if (validateStep('step2')) {
-        setStep('step2b');
-      }
-    } else if (step === 'step2b') {
-      if (validateStep('step3')) {
-        const estimation = calculerEstimation();
-        setFormData(prev => ({
-          ...prev,
-          prixMin: estimation.min,
-          prixMax: estimation.max,
-          prixMoyen: estimation.moyen
-        }));
-        setStep('results');
-      }
+  const handleProjectSelect = (project) => {
+    setFormData({ ...formData, project });
+    if (project === 'Autre') {
+      setStep('contact');
+    } else if (project === 'Acheter') {
+      setStep('buy-sector');
+    } else {
+      setStep('sell-address');
     }
   };
 
-  const handleSubmitForm = () => {
-    if (validateStep('step3')) {
-      setStep('merci');
+  const generateEmailHTML = () => {
+    let html = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+        <h2 style="color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 10px;">
+          Nouvelle demande immobilière
+        </h2>
+        
+        <h3 style="color: #374151; margin-top: 30px;">📋 Coordonnées</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; width: 200px;">Prénom</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.firstName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Nom</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.lastName}</td>
+          </tr>
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Email</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.email}</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Téléphone</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.phone}</td>
+          </tr>
+        </table>
+
+        <h3 style="color: #374151; margin-top: 30px;">🏠 Projet</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold; width: 200px;">Type de projet</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.project}</td>
+          </tr>
+    `;
+
+    if (formData.sector) {
+      html += `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Secteur</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.sector}</td>
+          </tr>
+      `;
     }
-  };
 
-  // Logo component
-  const Logo = () => (
-    <h1 className="text-3xl font-bold mb-2">
-      <span className="text-black">ENGEL</span><span className="text-red-600">&</span><span className="text-black">VÖLKERS</span>
-    </h1>
-  );
+    if (formData.propertyType) {
+      html += `
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Type de bien</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.propertyType}</td>
+          </tr>
+      `;
+    }
 
-  // CAPTCHA Step
-  if (step === 'captcha') {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-12">
-            <Logo />
-            <p className="text-gray-600">Estimation de votre bien immobilier</p>
-          </div>
-          
-          <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-            <p className="text-sm text-gray-700 mb-4">Je ne suis pas un robot</p>
-            <button
-              onClick={handleHumanVerification}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition"
-            >
-              Vérifier
-            </button>
-          </div>
-          
-          <p className="text-xs text-gray-500 text-center">Cette action vérifie votre humanité</p>
+    if (formData.address) {
+      html += `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Adresse</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.address}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.budget) {
+      html += `
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Budget</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.budget}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.rooms) {
+      html += `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Nombre de pièces</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.rooms}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.bedrooms) {
+      html += `
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Nombre de chambres</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.bedrooms}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.surface) {
+      html += `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Surface</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.surface} m²</td>
+          </tr>
+      `;
+    }
+
+    if (formData.floor) {
+      html += `
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Étage</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.floor}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.totalFloors) {
+      html += `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Étages total</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.totalFloors}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.hasBalcony) {
+      html += `
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Balcon</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.hasBalcony}${formData.balconySize ? ` (${formData.balconySize} m²)` : ''}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.hasTerrace) {
+      html += `
+          <tr>
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Terrasse</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.hasTerrace}${formData.terraceSize ? ` (${formData.terraceSize} m²)` : ''}</td>
+          </tr>
+      `;
+    }
+
+    if (formData.comments) {
+      html += `
+          <tr style="background-color: #f9fafb;">
+            <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: bold;">Commentaires</td>
+            <td style="padding: 12px; border: 1px solid #e5e7eb;">${formData.comments}</td>
+          </tr>
+      `;
+    }
+
+    html += `
+        </table>
+        
+        <div style="margin-top: 30px; padding: 15px; background-color: #fef2f2; border-left: 4px solid #dc2626;">
+          <p style="margin: 0; color: #991b1b;">
+            <strong>Action requise :</strong> Contactez ce prospect dans les 24 heures.
+          </p>
         </div>
       </div>
-    );
-  }
+    `;
 
-  // Step 1: Caractéristiques du bien
-  if (step === 'step1') {
-    return (
-      <div className="min-h-screen bg-white px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <Logo />
-            <p className="text-gray-600">Étape 1 : Localisation et caractéristiques du bien</p>
-          </div>
+    return html;
+  };
 
-          <form className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Adresse *</label>
-              <input
-                type="text"
-                name="adresse"
-                value={formData.adresse}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                placeholder="Rue, numéro"
-              />
-              {errors.adresse && <p className="text-red-600 text-sm mt-1">{errors.adresse}</p>}
-            </div>
+  const generateCSVContent = () => {
+    const rows = [
+      ['Champ', 'Valeur'],
+      ['Prénom', formData.firstName],
+      ['Nom', formData.lastName],
+      ['Email', formData.email],
+      ['Téléphone', formData.phone],
+      ['Projet', formData.project],
+      ['Secteur', formData.sector],
+      ['Type de bien', formData.propertyType],
+      ['Adresse', formData.address],
+      ['Budget', formData.budget],
+      ['Pièces', formData.rooms],
+      ['Chambres', formData.bedrooms],
+      ['Surface', formData.surface],
+      ['Étage', formData.floor],
+      ['Étages total', formData.totalFloors],
+      ['Balcon', formData.hasBalcony],
+      ['Surface balcon', formData.balconySize],
+      ['Terrasse', formData.hasTerrace],
+      ['Surface terrasse', formData.terraceSize],
+      ['Commentaires', formData.comments]
+    ];
+    
+    return rows.map(row => row.map(cell => `"${cell || ''}"`).join(',')).join('\n');
+  };
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Code postal *</label>
-                <input
-                  type="text"
-                  name="codePostal"
-                  value={formData.codePostal}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="75000"
-                />
-                {errors.codePostal && <p className="text-red-600 text-sm mt-1">{errors.codePostal}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Ville *</label>
-                <input
-                  type="text"
-                  name="ville"
-                  value={formData.ville}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="Paris"
-                />
-                {errors.ville && <p className="text-red-600 text-sm mt-1">{errors.ville}</p>}
-              </div>
-            </div>
+  const sendEmailWithEmailJS = async () => {
+    try {
+      setIsSubmitting(true);
+      setSubmitError('');
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Type de bien *</label>
-              <select
-                name="typeBien"
-                value={formData.typeBien}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
+      // Charger EmailJS depuis le CDN
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+      script.async = true;
+      
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+
+      // Attendre que emailjs soit disponible
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      if (typeof window.emailjs === 'undefined') {
+        throw new Error('EmailJS not loaded');
+      }
+
+      // Initialiser EmailJS
+      window.emailjs.init(EMAILJS_CONFIG.publicKey);
+
+      // Préparer les données
+      const emailHTML = generateEmailHTML();
+      const csvContent = generateCSVContent();
+
+      // Paramètres pour l'email
+      const templateParams = {
+        to_email: 'amine.elmaanni@gmail.com',
+        from_name: `${formData.firstName} ${formData.lastName}`,
+        reply_to: formData.email,
+        subject: `Nouvelle demande - ${formData.project}`,
+        message_html: emailHTML,
+        csv_data: csvContent,
+        project_type: formData.project,
+        contact_phone: formData.phone
+      };
+
+      // Envoyer l'email
+      const response = await window.emailjs.send(
+        EMAILJS_CONFIG.serviceId,
+        EMAILJS_CONFIG.templateId,
+        templateParams
+      );
+
+      console.log('Email envoyé avec succès:', response);
+      setStep('thankyou');
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi:', error);
+      setSubmitError(t.submitError);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Vérification que tous les champs requis sont remplis
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+      setSubmitError('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    // Envoyer via EmailJS
+    await sendEmailWithEmailJS();
+  };
+
+  const renderStep = () => {
+    switch(step) {
+      case 'captcha':
+        return (
+          <div className="text-center space-y-6">
+            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 inline-block">
+              <p className="text-gray-700 mb-4">{t.captchaText}</p>
+              <button
+                onClick={handleCaptcha}
+                className="bg-red-600 text-white px-8 py-3 rounded hover:bg-red-700 transition flex items-center gap-2 mx-auto"
               >
-                <option value="">Sélectionner un type</option>
-                <option value="apartment">Appartement</option>
-                <option value="maison">Maison</option>
-                <option value="terrain">Terrain</option>
-                <option value="parking">Parking</option>
-                <option value="immeuble">Immeuble</option>
-              </select>
-              {errors.typeBien && <p className="text-red-600 text-sm mt-1">{errors.typeBien}</p>}
+                <Check size={20} />
+                {t.captchaBtn}
+              </button>
             </div>
+          </div>
+        );
 
-            {formData.typeBien && formData.typeBien !== 'parking' && formData.typeBien !== 'immeuble' && (
-              <>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Superficie (m²) *</label>
-                  <input
-                    type="number"
-                    name="superficie"
-                    value={formData.superficie}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                    placeholder="120"
-                  />
-                  {errors.superficie && <p className="text-red-600 text-sm mt-1">{errors.superficie}</p>}
-                </div>
+      case 'intro':
+        return (
+          <div className="max-w-2xl mx-auto text-center space-y-8">
+            <p className="text-gray-700 text-lg leading-relaxed">{t.intro}</p>
+            <button
+              onClick={() => setStep('project')}
+              className="bg-red-600 text-white px-10 py-4 rounded hover:bg-red-700 transition text-lg"
+            >
+              {t.continue}
+            </button>
+          </div>
+        );
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Nombre de chambres</label>
-                  <input
-                    type="number"
-                    name="chambres"
-                    value={formData.chambres}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                    placeholder="3"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Optionnel</p>
-                </div>
+      case 'project':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light text-center mb-8">{t.projectQuestion}</h2>
+            <div className="grid gap-4">
+              {['Obtenir une estimation', 'Vendre', 'Acheter', 'Autre'].map(project => (
+                <button
+                  key={project}
+                  onClick={() => handleProjectSelect(project)}
+                  className="bg-white border-2 border-gray-200 p-6 rounded hover:border-red-600 transition text-left"
+                >
+                  {t[project.toLowerCase().replace(' ', '').replace('é', 'e')] || project}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Nombre de salles de bain *</label>
-                  <input
-                    type="number"
-                    name="sallesBain"
-                    value={formData.sallesBain}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                    placeholder="2"
-                  />
-                  {errors.sallesBain && <p className="text-red-600 text-sm mt-1">{errors.sallesBain}</p>}
-                </div>
+      case 'buy-sector':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">{t.sector}</h2>
+            <input
+              type="text"
+              value={formData.sector}
+              onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.sector}
+            />
+            <button
+              onClick={() => setStep('buy-type')}
+              className="w-full bg-red-600 text-white py-4 rounded hover:bg-red-700 transition"
+            >
+              {t.continue}
+            </button>
+          </div>
+        );
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">Année de construction *</label>
-                  <input
-                    type="number"
-                    name="anneeConstruction"
-                    value={formData.anneeConstruction}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                    placeholder="1990"
-                  />
-                  {errors.anneeConstruction && <p className="text-red-600 text-sm mt-1">{errors.anneeConstruction}</p>}
-                </div>
-              </>
-            )}
+      case 'buy-type':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">{t.propertyType}</h2>
+            <div className="grid gap-4">
+              {['Appartement', 'Maison', 'Immeuble', 'Commerce', 'Autre'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setFormData({ ...formData, propertyType: type });
+                    if (['Immeuble', 'Commerce', 'Autre'].includes(type)) {
+                      setStep('contact');
+                    } else {
+                      setStep('buy-details');
+                    }
+                  }}
+                  className="bg-white border-2 border-gray-200 p-6 rounded hover:border-red-600 transition text-left"
+                >
+                  {t[type.toLowerCase()] || type}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
 
-            {(formData.typeBien === 'parking' || formData.typeBien === 'immeuble') && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Superficie (m²) *</label>
+      case 'buy-details':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">Détails de votre recherche</h2>
+            <input
+              type="text"
+              value={formData.budget}
+              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.budget}
+            />
+            <input
+              type="number"
+              value={formData.rooms}
+              onChange={(e) => setFormData({ ...formData, rooms: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.rooms}
+            />
+            <input
+              type="text"
+              value={formData.surface}
+              onChange={(e) => setFormData({ ...formData, surface: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.surface}
+            />
+            <button
+              onClick={() => setStep('contact')}
+              className="w-full bg-red-600 text-white py-4 rounded hover:bg-red-700 transition"
+            >
+              {t.continue}
+            </button>
+          </div>
+        );
+
+      case 'sell-address':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">{t.address}</h2>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.address}
+            />
+            <button
+              onClick={() => setStep('sell-type')}
+              className="w-full bg-red-600 text-white py-4 rounded hover:bg-red-700 transition"
+            >
+              {t.continue}
+            </button>
+          </div>
+        );
+
+      case 'sell-type':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">{t.propertyType}</h2>
+            <div className="grid gap-4">
+              {['Appartement', 'Maison', 'Parking', 'Immeuble', 'Commerce', 'Autre'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setFormData({ ...formData, propertyType: type });
+                    if (['Parking', 'Immeuble', 'Commerce'].includes(type)) {
+                      setStep('contact');
+                    } else {
+                      setStep('sell-details');
+                    }
+                  }}
+                  className="bg-white border-2 border-gray-200 p-6 rounded hover:border-red-600 transition text-left"
+                >
+                  {t[type.toLowerCase()] || type}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'sell-details':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">Caractéristiques du bien</h2>
+            <input
+              type="number"
+              value={formData.rooms}
+              onChange={(e) => setFormData({ ...formData, rooms: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.rooms}
+            />
+            <input
+              type="number"
+              value={formData.bedrooms}
+              onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.bedrooms}
+            />
+            <input
+              type="number"
+              value={formData.floor}
+              onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.floor}
+            />
+            <input
+              type="number"
+              value={formData.totalFloors}
+              onChange={(e) => setFormData({ ...formData, totalFloors: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.totalFloors}
+            />
+            
+            <div className="space-y-4">
+              <label className="block text-gray-700">{t.hasBalcony}</label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setFormData({ ...formData, hasBalcony: 'Oui' })}
+                  className={`flex-1 p-4 border-2 rounded ${formData.hasBalcony === 'Oui' ? 'border-red-600 bg-red-50' : 'border-gray-200'}`}
+                >
+                  {t.yes}
+                </button>
+                <button
+                  onClick={() => setFormData({ ...formData, hasBalcony: 'Non', balconySize: '' })}
+                  className={`flex-1 p-4 border-2 rounded ${formData.hasBalcony === 'Non' ? 'border-red-600 bg-red-50' : 'border-gray-200'}`}
+                >
+                  {t.no}
+                </button>
+              </div>
+              {formData.hasBalcony === 'Oui' && (
                 <input
                   type="number"
-                  name="superficie"
-                  value={formData.superficie}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="120"
+                  value={formData.balconySize}
+                  onChange={(e) => setFormData({ ...formData, balconySize: e.target.value })}
+                  className="w-full p-4 border border-gray-300 rounded"
+                  placeholder={t.balconySize}
                 />
-                {errors.superficie && <p className="text-red-600 text-sm mt-1">{errors.superficie}</p>}
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <label className="block text-gray-700">{t.hasTerrace}</label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setFormData({ ...formData, hasTerrace: 'Oui' })}
+                  className={`flex-1 p-4 border-2 rounded ${formData.hasTerrace === 'Oui' ? 'border-red-600 bg-red-50' : 'border-gray-200'}`}
+                >
+                  {t.yes}
+                </button>
+                <button
+                  onClick={() => setFormData({ ...formData, hasTerrace: 'Non', terraceSize: '' })}
+                  className={`flex-1 p-4 border-2 rounded ${formData.hasTerrace === 'Non' ? 'border-red-600 bg-red-50' : 'border-gray-200'}`}
+                >
+                  {t.no}
+                </button>
               </div>
-            )}
+              {formData.hasTerrace === 'Oui' && (
+                <input
+                  type="number"
+                  value={formData.terraceSize}
+                  onChange={(e) => setFormData({ ...formData, terraceSize: e.target.value })}
+                  className="w-full p-4 border border-gray-300 rounded"
+                  placeholder={t.terraceSize}
+                />
+              )}
+            </div>
 
             <button
-              type="button"
-              onClick={handleNextStep}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition flex items-center justify-center gap-2"
+              onClick={() => setStep('contact')}
+              className="w-full bg-red-600 text-white py-4 rounded hover:bg-red-700 transition"
             >
-              Suivant <ChevronRight size={20} />
+              {t.continue}
             </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 2: Projet
-  if (step === 'step2') {
-    return (
-      <div className="min-h-screen bg-white px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <Logo />
-            <p className="text-gray-600">Étape 2 : Votre projet</p>
           </div>
+        );
 
-          <form className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-4">Quel est votre projet ? *</label>
-              <div className="space-y-3">
-                <label className="flex items-center p-3 border-2 border-gray-200 rounded cursor-pointer hover:border-red-600 transition">
-                  <input
-                    type="radio"
-                    name="projet"
-                    value="estimation"
-                    checked={formData.projet === 'estimation'}
-                    onChange={handleInputChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="ml-3 text-gray-800 font-medium">J'aimerais juste connaître la valeur</span>
-                </label>
-                <label className="flex items-center p-3 border-2 border-gray-200 rounded cursor-pointer hover:border-red-600 transition">
-                  <input
-                    type="radio"
-                    name="projet"
-                    value="vente"
-                    checked={formData.projet === 'vente'}
-                    onChange={handleInputChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="ml-3 text-gray-800 font-medium">Je souhaite vendre mon bien</span>
-                </label>
-                <label className="flex items-center p-3 border-2 border-gray-200 rounded cursor-pointer hover:border-red-600 transition">
-                  <input
-                    type="radio"
-                    name="projet"
-                    value="achat"
-                    checked={formData.projet === 'achat'}
-                    onChange={handleInputChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="ml-3 text-gray-800 font-medium">Je souhaite acheter</span>
-                </label>
-                <label className="flex items-center p-3 border-2 border-gray-200 rounded cursor-pointer hover:border-red-600 transition">
-                  <input
-                    type="radio"
-                    name="projet"
-                    value="autre"
-                    checked={formData.projet === 'autre'}
-                    onChange={handleInputChange}
-                    className="w-4 h-4"
-                  />
-                  <span className="ml-3 text-gray-800 font-medium">Autre projet</span>
-                </label>
-              </div>
-              {errors.projet && <p className="text-red-600 text-sm mt-2">{errors.projet}</p>}
-            </div>
-
-            {formData.projet === 'vente' && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Quand souhaitez-vous mettre en vente ? *</label>
-                <select
-                  name="dateVente"
-                  value={formData.dateVente}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                >
-                  <option value="">Sélectionner une période</option>
-                  <option value="immediate">Immédiatement</option>
-                  <option value="1-3-mois">Dans 1 à 3 mois</option>
-                  <option value="3-6-mois">Dans 3 à 6 mois</option>
-                  <option value="6-12-mois">Dans 6 à 12 mois</option>
-                  <option value="plus-1-an">Plus tard</option>
-                </select>
-                {errors.dateVente && <p className="text-red-600 text-sm mt-1">{errors.dateVente}</p>}
+      case 'contact':
+        return (
+          <div className="max-w-xl mx-auto space-y-6">
+            <h2 className="text-2xl font-light mb-4">{t.contactTitle}</h2>
+            
+            {submitError && (
+              <div className="bg-red-50 border border-red-300 rounded-lg p-4 flex items-center gap-3 text-red-700">
+                <AlertCircle size={20} />
+                <span>{submitError}</span>
               </div>
             )}
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setStep('step1')}
-                className="flex-1 border-2 border-red-600 text-red-600 py-3 rounded font-semibold hover:bg-red-50 transition"
-              >
-                Retour
-              </button>
-              <button
-                type="button"
-                onClick={handleNextStep}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition flex items-center justify-center gap-2"
-              >
-                Suivant <ChevronRight size={20} />
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 2b: Coordonnées
-  if (step === 'step2b') {
-    return (
-      <div className="min-h-screen bg-white px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <Logo />
-            <p className="text-gray-600">Étape 3 : Vos coordonnées</p>
+            
+            <input
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.firstName + ' *'}
+              required
+            />
+            <input
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.lastName + ' *'}
+              required
+            />
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.email + ' *'}
+              required
+            />
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded"
+              placeholder={t.phone + ' *'}
+              required
+            />
+            <textarea
+              value={formData.comments}
+              onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+              className="w-full p-4 border border-gray-300 rounded h-32"
+              placeholder={t.commentsPlaceholder}
+            />
+            <button
+              onClick={handleSubmit}
+              disabled={!formData.firstName || !formData.lastName || !formData.email || !formData.phone || isSubmitting}
+              className="w-full bg-red-600 text-white py-4 rounded hover:bg-red-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  {t.submitting}
+                </>
+              ) : (
+                t.submit
+              )}
+            </button>
           </div>
+        );
 
-          <form className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Prénom *</label>
-                <input
-                  type="text"
-                  name="prenom"
-                  value={formData.prenom}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="Jean"
-                />
-                {errors.prenom && <p className="text-red-600 text-sm mt-1">{errors.prenom}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Nom *</label>
-                <input
-                  type="text"
-                  name="nom"
-                  value={formData.nom}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="Dupont"
-                />
-                {errors.nom && <p className="text-red-600 text-sm mt-1">{errors.nom}</p>}
-              </div>
+      case 'thankyou':
+        return (
+          <div className="max-w-2xl mx-auto text-center space-y-8">
+            <div className="bg-red-50 border-2 border-red-600 rounded-lg p-8">
+              <Check size={64} className="text-red-600 mx-auto mb-4" />
+              <h2 className="text-3xl font-light mb-4">{t.thankYouTitle}</h2>
+              <p className="text-gray-700 text-lg">{t.thankYouMsg}</p>
+            </div>
+            
+            <div className="bg-white border border-gray-200 rounded-lg p-8 text-left">
+              <h3 className="text-xl font-light mb-4">{t.nextSteps}</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <Check size={20} className="text-red-600 mt-1 flex-shrink-0" />
+                  <span>{t.step1}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check size={20} className="text-red-600 mt-1 flex-shrink-0" />
+                  <span>{t.step2}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check size={20} className="text-red-600 mt-1 flex-shrink-0" />
+                  <span>{t.step3}</span>
+                </li>
+              </ul>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Email *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                placeholder="jean.dupont@email.com"
-              />
-              {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+            <div className="bg-gray-50 rounded-lg p-6 text-sm text-gray-600">
+              <p>{t.rgpd}</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Téléphone *</label>
-              <input
-                type="tel"
-                name="telephone"
-                value={formData.telephone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                placeholder="06 12 34 56 78"
-              />
-              {errors.telephone && <p className="text-red-600 text-sm mt-1">{errors.telephone}</p>}
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setStep('step2')}
-                className="flex-1 border-2 border-red-600 text-red-600 py-3 rounded font-semibold hover:bg-red-50 transition"
-              >
-                Retour
-              </button>
-              <button
-                type="button"
-                onClick={handleNextStep}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition flex items-center justify-center gap-2"
-              >
-                Voir estimation <ChevronRight size={20} />
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 3: Estimation pour parking/immeuble
-  if (step === 'step3' && !formData.prixMoyen) {
-    return (
-      <div className="min-h-screen bg-white px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <Logo />
-            <p className="text-gray-600">Dernière étape : Vos coordonnées</p>
+            <a
+              href="https://www.engelvoelkers.com/fr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-red-600 text-white px-10 py-4 rounded hover:bg-red-700 transition"
+            >
+              {t.visitSite}
+            </a>
           </div>
+        );
 
-          <form className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Prénom *</label>
-                <input
-                  type="text"
-                  name="prenom"
-                  value={formData.prenom}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="Jean"
-                />
-                {errors.prenom && <p className="text-red-600 text-sm mt-1">{errors.prenom}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Nom *</label>
-                <input
-                  type="text"
-                  name="nom"
-                  value={formData.nom}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                  placeholder="Dupont"
-                />
-                {errors.nom && <p className="text-red-600 text-sm mt-1">{errors.nom}</p>}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Email *</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                placeholder="jean.dupont@email.com"
-              />
-              {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Téléphone *</label>
-              <input
-                type="tel"
-                name="telephone"
-                value={formData.telephone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded focus:outline-none focus:border-red-600"
-                placeholder="06 12 34 56 78"
-              />
-              {errors.telephone && <p className="text-red-600 text-sm mt-1">{errors.telephone}</p>}
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setStep('step1')}
-                className="flex-1 border-2 border-red-600 text-red-600 py-3 rounded font-semibold hover:bg-red-50 transition"
-              >
-                Retour
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (validateStep('step3')) {
-                    const estimation = calculerEstimation();
-                    setFormData(prev => ({
-                      ...prev,
-                      prixMin: estimation.min,
-                      prixMax: estimation.max,
-                      prixMoyen: estimation.moyen
-                    }));
-                    setStep('results');
-                  }
-                }}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition flex items-center justify-center gap-2"
-              >
-                Voir estimation <ChevronRight size={20} />
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // Résultats
-  if (step === 'results') {
-    return (
-      <div className="min-h-screen bg-white px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <Logo />
-            <p className="text-gray-600">Votre estimation immobilière</p>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-8 mb-8">
-            <div className="text-center mb-8">
-              <p className="text-gray-600 text-sm mb-4">Fourchette estimée</p>
-              <div className="flex items-center justify-center gap-6 mb-8">
-                <div>
-                  <p className="text-2xl font-bold text-red-600">{formData.prixMin.toLocaleString('fr-FR')} €</p>
-                  <p className="text-xs text-gray-500">Minimum</p>
-                </div>
-                <p className="text-gray-400 text-2xl">-</p>
-                <div>
-                  <p className="text-2xl font-bold text-red-600">{formData.prixMax.toLocaleString('fr-FR')} €</p>
-                  <p className="text-xs text-gray-500">Maximum</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded p-6 text-center border-2 border-red-100">
-                <p className="text-gray-600 text-sm mb-2">Prix moyen estimé</p>
-                <p className="text-5xl font-bold text-red-600">{formData.prixMoyen.toLocaleString('fr-FR')} €</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded p-6 mt-8">
-              <h3 className="font-semibold text-gray-800 mb-4">Explication du prix</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                Cette estimation est basée sur l'analyse des caractéristiques de votre bien. Le prix moyen représente la valeur marchande estimée dans votre région. La fourchette tient compte des fluctuations du marché immobilier local.
-              </p>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Un conseiller Engel Völkers vous contactera pour affiner cette estimation en fonction de facteurs supplémentaires.
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleSubmitForm}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition mb-4"
-          >
-            Confirmer et recevoir l'estimation
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Page de remerciement
-  if (step === 'merci') {
-    return (
-      <div className="min-h-screen bg-white px-4 py-8 flex items-center">
-        <div className="max-w-2xl mx-auto w-full">
-          <div className="text-center mb-12">
-            <Logo />
-            <p className="text-gray-600 mt-4">Merci de votre demande d'estimation</p>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-8 mb-8 space-y-6">
-            <div>
-              <h2 className="font-semibold text-gray-800 mb-4">Confirmation de votre demande</h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                Votre demande d'estimation a bien été enregistrée. Un conseiller immobilier Engel Völkers prendra contact avec vous très prochainement pour discuter de votre projet et affiner l'estimation de votre bien.
-              </p>
-            </div>
-
-            <div className="border-t-2 border-gray-200 pt-6">
-              <h3 className="font-semibold text-gray-800 mb-3">Protection de vos données (RGPD)</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Vos données personnelles sont traitées conformément au Règlement Général sur la Protection des Données (RGPD). Elles seront utilisées uniquement pour vous contacter concernant votre estimation immobilière et votre projet. Vous disposez d'un droit d'accès, de modification et de suppression de vos données.
-              </p>
-            </div>
-
-            <div className="border-t-2 border-gray-200 pt-6">
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Un de nos conseillers vous contactera prochainement pour discuter des résultats et explorer les meilleures solutions pour votre projet immobilier.
-              </p>
-            </div>
-          </div>
-
-          <a
-            href="https://www.engel-voelkers.com/fr/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded font-semibold transition flex items-center justify-center gap-2 inline-block text-center"
-          >
-            Visiter le site Engel Völkers <ChevronRight size={20} />
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
+      default:
+        return null
