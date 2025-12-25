@@ -30,9 +30,9 @@ const PrestigeRealEstate = () => {
 
   // Configuration EmailJS
   const EMAILJS_CONFIG = {
-    serviceId: 'service_xxxxxxx',  // À remplacer
-    templateId: 'template_xxxxxxx', // À remplacer
-    publicKey: 'YOUR_PUBLIC_KEY'    // À remplacer
+    serviceId: 'service_bv78z9m',  // À remplacer
+    templateId: 'template_oeiicl5', // À remplacer
+    publicKey: 'Ll690TMCQsN494dEP'    // À remplacer
   };
 
   const translations = {
